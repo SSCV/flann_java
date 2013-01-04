@@ -1,2 +1,1 @@
-flann_java
-==========
+FLANN in Java.
