@@ -14,7 +14,25 @@ public class IndexKDTreeSingle extends IndexBase {
 	private Node root;
 	private BoundingBox rootBBox;
 	ArrayList<Integer> objectsIndices;
-	
+
+	public static class BuildParams {
+		public int maxPointsInOneLeafNode;
+		public boolean reorder;
+
+		public BuildParams () {
+			this.maxPointsInOneLeafNode = 10;
+			this.reorder = false;
+		}
+		
+		public BuildParams (int maxPointsInOneLeafNode, boolean reorder) {
+			this.maxPointsInOneLeafNode = maxPointsInOneLeafNode;
+			this.reorder = reorder;
+		}
+	}
+
+	public static class SearchParams extends SearchParamsBase {		
+	}
+
 	private class Node {
 		public Node child1, child2;
 		public int cutDimension;
@@ -24,10 +42,10 @@ public class IndexKDTreeSingle extends IndexBase {
 		public int leftObjectIndex, rightObjectIndex;
 	}
 
-    public IndexKDTreeSingle (Metric metric, double[][] data, int maxPointsInOneLeafNode) {
+	public IndexKDTreeSingle (Metric metric, double[][] data, BuildParams buildParams) {
 		super(metric, data);
 
-		this.maxPointsInOneLeafNode = maxPointsInOneLeafNode;
+		this.maxPointsInOneLeafNode = buildParams.maxPointsInOneLeafNode;
 		this.root = null;
 		this.rootBBox = new BoundingBox();
 
@@ -42,7 +60,9 @@ public class IndexKDTreeSingle extends IndexBase {
 		root = divideTree (0, numberOfObjects, rootBBox);
 	}
 
-	public void knnSearch (double[][] queries, int[][] indices, double[][] distances, int k, float eps) {
+	public void knnSearch (double[][] queries, int[][] indices, double[][] distances, SearchParams searchParams) {
+		int k = searchParams.numberOfNeighbors;
+		float eps = searchParams.eps;
 		KNNSimpleResultSet resultSet = new KNNSimpleResultSet (k);
 		for (int i = 0; i < queries.length; i++) {
 			resultSet.clear();

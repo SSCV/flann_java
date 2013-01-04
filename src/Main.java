@@ -35,12 +35,15 @@ public class Main {
 		Metric metric = new MetricEuclideanSquared();
 
 		// Construct/initialize the index, and then build.
-		int maxPointsInOneLeafNode = 3;
-		IndexKDTreeSingle index = new IndexKDTreeSingle (metric, data, maxPointsInOneLeafNode);
+		IndexKDTreeSingle.BuildParams buildParams = new IndexKDTreeSingle.BuildParams (3, false);
+		IndexKDTreeSingle index = new IndexKDTreeSingle (metric, data, buildParams);
 		index.buildIndex();
 
 		// Perform kNN search.
-		index.knnSearch (queries, indices, distances, k, 0.0f);
+		IndexKDTreeSingle.SearchParams searchParams = new IndexKDTreeSingle.SearchParams ();
+		searchParams.eps = 0.0f;
+		searchParams.numberOfNeighbors = k;
+		index.knnSearch (queries, indices, distances, searchParams);
 
 		// Print the result contained in matrices 'indices' and 'distances'.
 		for (int i = 0; i < q; i++) {
