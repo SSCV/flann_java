@@ -17,7 +17,8 @@ public class Main {
 		// Each row is a query.
 		double[][] queries = {
 				{3,1},
-				{5,3}
+				{5,3},
+				{3, 3.6}
 		};
 
 		// kNN search parameter.
@@ -42,8 +43,12 @@ public class Main {
 		// Perform kNN search.
 		IndexKDTreeSingle.SearchParams searchParams = new IndexKDTreeSingle.SearchParams ();
 		searchParams.eps = 0.0f;
-		searchParams.numberOfNeighbors = k;
-		index.knnSearch (queries, indices, distances, searchParams);
+		searchParams.maxNeighbors = k;
+		//index.knnSearch (queries, indices, distances, searchParams);
+		
+		// Perform radius search.
+		searchParams.radius = 0.3;
+		index.radiusSearch (queries, indices, distances, searchParams);
 
 		// Print the result contained in matrices 'indices' and 'distances'.
 		for (int i = 0; i < q; i++) {

@@ -1,7 +1,7 @@
 package flann.index;
 
 import flann.metric.Metric;
-import flann.result_set.KNNSimpleResultSet;
+import flann.result_set.*;
 import flann.util.BoundingBox;
 
 import java.util.ArrayList;
@@ -61,18 +61,78 @@ public class IndexKDTreeSingle extends IndexBase {
 	}
 
 	public void knnSearch (double[][] queries, int[][] indices, double[][] distances, SearchParams searchParams) {
-		int k = searchParams.numberOfNeighbors;
-		float eps = searchParams.eps;
+		int k = searchParams.maxNeighbors;
 		KNNSimpleResultSet resultSet = new KNNSimpleResultSet (k);
 		for (int i = 0; i < queries.length; i++) {
 			resultSet.clear();
-			findNeighbors (resultSet, queries[i], k, eps);
+			findNeighbors (resultSet, queries[i], searchParams);
 			int n = Math.min (resultSet.size(), k);
 			resultSet.copy (distances[i], indices[i], n);
 		}
     }
+	
+	public int radiusSearch (double[][] queries, int[][] indices, double[][] distances, SearchParams searchParams) {
+		double radius = searchParams.radius;
+		int maxNeighbors = searchParams.maxNeighbors;
+		int outputColumns = indices[0].length;
+		if (maxNeighbors < 0)
+			maxNeighbors = outputColumns;
+		else
+			maxNeighbors = Math.min(maxNeighbors, outputColumns);
 
-	private void findNeighbors (KNNSimpleResultSet resultSet, double[] query, int k, float eps) {
+		// Only count the neighbors, without returning them.
+		int count = 0;
+		if (maxNeighbors == 0) {
+			CountRadiusResultSet resultSet = new CountRadiusResultSet(radius);
+			for (int i = 0; i < queries.length; i++) {
+				resultSet.clear ();
+				findNeighbors (resultSet, queries[i], searchParams);
+				count += resultSet.size();
+			}
+		} else {
+			// Unlimited result-set.
+			if (searchParams.maxNeighbors < 0 && numberOfObjects <= outputColumns) {
+				RadiusResultSet resultSet = new RadiusResultSet (radius);
+				for (int i = 0; i < queries.length; i++) {
+					resultSet.clear ();
+					findNeighbors (resultSet, queries[i], searchParams);
+					int n = resultSet.size();
+					count += n;
+					n = Math.min (n, outputColumns);
+					resultSet.copy (distances[i], indices[i], n);
+					
+					// Mark the position after the last element as unused.
+					if (n < outputColumns) {
+						distances[i][n] = Double.MAX_VALUE;
+						indices[i][n] = -1;
+					}
+				}
+			// Limited result-set.
+			} else {
+				KNNRadiusResultSet resultSet = new KNNRadiusResultSet (radius, maxNeighbors);
+				for (int i = 0; i < queries.length; i++) {
+					resultSet.clear ();
+					findNeighbors (resultSet, queries[i], searchParams);
+					int n = resultSet.size();
+					count += n;
+					n = Math.min(n, maxNeighbors);
+					resultSet.copy (distances[i], indices[i], n);
+					
+					// Mark the position after the last element as unused.
+					if (n < outputColumns) {
+						distances[i][n] = Double.MAX_VALUE;
+						indices[i][n] = -1;
+					}
+				}
+			}
+		}
+		
+		return count;
+	}
+
+	private void findNeighbors (ResultSet resultSet, double[] query, SearchParams searchParams) {
+		int k = searchParams.maxNeighbors;
+		float eps = searchParams.eps;
 		float epsError = 1 + eps;
 		ArrayList<Double> distances = new ArrayList<Double> ();
 		for (int i = 0; i < numberOfDimensions; i++) {
@@ -82,7 +142,7 @@ public class IndexKDTreeSingle extends IndexBase {
 		searchLevel (root, query, resultSet, k, epsError, distsq, distances);
 	}
 
-	private void searchLevel(Node node, double[] query, KNNSimpleResultSet resultSet,
+	private void searchLevel(Node node, double[] query, ResultSet resultSet,
 							 int k, float eps, Double mindistsq, ArrayList<Double> dists) {
 		// If this is a leaf node.
 		if (node.child1 == null && node.child2 == null) {

@@ -11,19 +11,24 @@ public class SearchParamsBase {
 	public boolean sorted;
 	
 	// How many neighbors should be returned (-1 for unlimited).
-	public int numberOfNeighbors;
+	public int maxNeighbors;
+	
+	// Used for radius search.
+	public double radius;
 	
 	public SearchParamsBase () {
 		this.checks = -1;
 		this.eps = 0.0f;
 		this.sorted = true;
-		this.numberOfNeighbors = -1;
+		this.maxNeighbors = -1;
+		this.radius = 0.0;
 	}
 	
-	public SearchParamsBase (int checks, float eps, boolean sorted, int maxNeighbors) {
+	public SearchParamsBase (int checks, float eps, boolean sorted, int maxNeighbors, double radius) {
 		this.checks = checks;
 		this.eps = eps;
 		this.sorted = sorted;
-		this.numberOfNeighbors = maxNeighbors;
+		this.maxNeighbors = maxNeighbors;
+		this.radius = radius;
 	}
 }
