@@ -36,9 +36,9 @@ public class Main {
 		Metric metric = new MetricEuclideanSquared();
 
 		// Construct/initialize the index, and then build.
-		IndexKDTreeSingle.BuildParams buildParams = new IndexKDTreeSingle.BuildParams (3, false);
-		IndexKDTreeSingle index = new IndexKDTreeSingle (metric, data, buildParams);
-		index.buildIndex();
+		//IndexKDTreeSingle.BuildParams buildParams = new IndexKDTreeSingle.BuildParams (3, false);
+		//IndexBase index = new IndexKDTreeSingle (metric, data, buildParams);
+		//index.buildIndex();
 
 		IndexKDTreeSingle.SearchParams searchParams = new IndexKDTreeSingle.SearchParams ();
 		
@@ -48,9 +48,18 @@ public class Main {
 		//index.knnSearch (queries, indices, distances, searchParams);
 		
 		// Perform radius search.
-		searchParams.radius = 0.3;
-		index.radiusSearch (queries, indices, distances, searchParams);
+		searchParams.radius = 0.4;
+		//index.radiusSearch (queries, indices, distances, searchParams);
 
+		IndexKDTree.BuildParams buildParams = new IndexKDTree.BuildParams (4);
+		IndexBase index2 = new IndexKDTree (metric, data, buildParams);
+		index2.buildIndex();
+		IndexKDTree.SearchParams searchParams2 = new IndexKDTree.SearchParams ();
+		searchParams2.eps = 0.0f;
+		searchParams2.maxNeighbors = k;
+		searchParams2.checks = 128;
+		index2.knnSearch (queries, indices, distances, searchParams2);
+		
 		// Print the result contained in matrices 'indices' and 'distances'.
 		for (int i = 0; i < q; i++) {
 			for (int j = 0; j < k; j++) {

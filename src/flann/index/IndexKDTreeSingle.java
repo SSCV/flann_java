@@ -53,82 +53,12 @@ public class IndexKDTreeSingle extends IndexBase {
 		}
 	}
 
-	public void buildIndex() {
+	protected void buildIndexImpl() {
 		rootBBox.fitToData (data);
 		root = divideTree (0, numberOfObjects, rootBBox);
 	}
 
-	public void knnSearch (double[][] queries, int[][] indices, double[][] distances, SearchParams searchParams) {
-		int k = searchParams.maxNeighbors;
-		KNNSimpleResultSet resultSet = new KNNSimpleResultSet (k);
-		for (int i = 0; i < queries.length; i++) {
-			resultSet.clear();
-			findNeighbors (resultSet, queries[i], searchParams);
-			int n = Math.min (resultSet.size(), k);
-			resultSet.copy (distances[i], indices[i], n);
-		}
-    }
-	
-	public int radiusSearch (double[][] queries, int[][] indices, double[][] distances, SearchParams searchParams) {
-		double radius = searchParams.radius;
-		int maxNeighbors = searchParams.maxNeighbors;
-		int outputColumns = indices[0].length;
-		if (maxNeighbors < 0)
-			maxNeighbors = outputColumns;
-		else
-			maxNeighbors = Math.min(maxNeighbors, outputColumns);
-
-		// Only count the neighbors, without returning them.
-		int count = 0;
-		if (maxNeighbors == 0) {
-			CountRadiusResultSet resultSet = new CountRadiusResultSet(radius);
-			for (int i = 0; i < queries.length; i++) {
-				resultSet.clear ();
-				findNeighbors (resultSet, queries[i], searchParams);
-				count += resultSet.size();
-			}
-		} else {
-			// Unlimited result-set.
-			if (searchParams.maxNeighbors < 0 && numberOfObjects <= outputColumns) {
-				RadiusResultSet resultSet = new RadiusResultSet (radius);
-				for (int i = 0; i < queries.length; i++) {
-					resultSet.clear ();
-					findNeighbors (resultSet, queries[i], searchParams);
-					int n = resultSet.size();
-					count += n;
-					n = Math.min (n, outputColumns);
-					resultSet.copy (distances[i], indices[i], n);
-					
-					// Mark the position after the last element as unused.
-					if (n < outputColumns) {
-						distances[i][n] = Double.MAX_VALUE;
-						indices[i][n] = -1;
-					}
-				}
-			// Limited result-set.
-			} else {
-				KNNRadiusResultSet resultSet = new KNNRadiusResultSet (radius, maxNeighbors);
-				for (int i = 0; i < queries.length; i++) {
-					resultSet.clear ();
-					findNeighbors (resultSet, queries[i], searchParams);
-					int n = resultSet.size();
-					count += n;
-					n = Math.min(n, maxNeighbors);
-					resultSet.copy (distances[i], indices[i], n);
-					
-					// Mark the position after the last element as unused.
-					if (n < outputColumns) {
-						distances[i][n] = Double.MAX_VALUE;
-						indices[i][n] = -1;
-					}
-				}
-			}
-		}
-		
-		return count;
-	}
-
-	private void findNeighbors (ResultSet resultSet, double[] query, SearchParams searchParams) {
+	protected void findNeighbors (ResultSet resultSet, double[] query, SearchParamsBase searchParams) {
 		int k = searchParams.maxNeighbors;
 		float eps = searchParams.eps;
 		float epsError = 1 + eps;
