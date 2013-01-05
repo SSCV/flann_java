@@ -12,10 +12,9 @@ import flann.util.Utils;
 
 
 public class IndexKDTree extends IndexBase {
-	int trees;
 	ArrayList<Node> treeRootNodes;
-	double[] mean;
-	double[] var;
+	int trees;
+
 	int SAMPLE_MEAN = 100;
 	int RAND_DIM = 5;
 
@@ -73,9 +72,6 @@ public class IndexKDTree extends IndexBase {
 	}
 
 	protected void buildIndexImpl () {
-		mean = new double[numberOfDimensions];
-		var = new double[numberOfDimensions];
-
 		// Construct the randomized trees.
 		for (int i = 0; i < trees; i++) {
 			// Randomize the order of objects to allow for unbiased sampling.
@@ -91,14 +87,16 @@ public class IndexKDTree extends IndexBase {
 		if (count == 1) {
 			node.child1 = node.child2 = null;
 			int index = objectsIndices.get(start);
-			node.cutDimension = index;
+			node.cutDimension = index; // Use cutDimension to store the point index.
 			node.point = data[index];
 		} else {
 			meanSplitResult out = new meanSplitResult();
             meanSplit (start, count, out);
-            int cutObjectIndex = out.cutObjectIndex;
+            
     		node.cutDimension = out.cutDimension;
     		node.cutDimensionValue = out.cutDimensionValue;
+    		
+    		int cutObjectIndex = out.cutObjectIndex;
     		node.child1 = divideTree (start, cutObjectIndex);
     		node.child2 = divideTree (start+cutObjectIndex, count-cutObjectIndex);
 		}
@@ -118,6 +116,9 @@ public class IndexKDTree extends IndexBase {
 	 * its mean as the threshold value.
 	 */
 	private void meanSplit (int start, int count, meanSplitResult out) {
+		double[] mean = new double[numberOfDimensions];
+		double[] var = new double[numberOfDimensions];
+		
 		for (int i = 0; i < numberOfDimensions; i++) {
 			mean[i] = var[i] = 0.0;
 		}
