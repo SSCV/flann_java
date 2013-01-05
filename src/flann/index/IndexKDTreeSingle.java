@@ -5,15 +5,13 @@ import flann.result_set.*;
 import flann.util.BoundingBox;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 
 
 public class IndexKDTreeSingle extends IndexBase {
-	private int maxPointsInOneLeafNode;
-	private Node root;
-	private BoundingBox rootBBox;
-	ArrayList<Integer> objectsIndices;
+	int maxPointsInOneLeafNode;
+	Node root;
+	BoundingBox rootBBox;
 
 	public static class BuildParams {
 		public int maxPointsInOneLeafNode;
@@ -217,7 +215,7 @@ public class IndexKDTreeSingle extends IndexBase {
             middleSplit (left, right-left, bbox, out);
             int cutObjectIndex = out.cutObjectIndex;
             int cutDimension = out.cutDimension;
-    		double cutValue = out.cutValue;
+    		double cutValue = out.cutDimensionValue;
 
             node.cutDimension = cutDimension;
 
@@ -244,7 +242,7 @@ public class IndexKDTreeSingle extends IndexBase {
 	private class middleSplitResult {
 		public int cutObjectIndex;
 		public int cutDimension;
-		public double cutValue;
+		public double cutDimensionValue;
 	}
 
 	private void middleSplit (int start, int count, BoundingBox bbox, middleSplitResult out) {
@@ -252,11 +250,11 @@ public class IndexKDTreeSingle extends IndexBase {
 		out.cutDimension = bbox.getMaxSpanDimension();
 		double min = bbox.getMin (out.cutDimension);
 		double max = bbox.getMax (out.cutDimension);
-		out.cutValue = (min + max) / 2;
+		out.cutDimensionValue = (min + max) / 2;
 
 		// Hyperplane partitioning.
 		int[] lim1Andlim2Wrapper = new int[2];
-		planeSplit (start, count, out.cutDimension, out.cutValue, lim1Andlim2Wrapper);
+		planeSplit (start, count, out.cutDimension, out.cutDimensionValue, lim1Andlim2Wrapper);
 		int lim1 = lim1Andlim2Wrapper[0];
 		int lim2 = lim1Andlim2Wrapper[1];
 
@@ -268,53 +266,5 @@ public class IndexKDTreeSingle extends IndexBase {
         	out.cutObjectIndex = lim2;
         else
         	out.cutObjectIndex = countHalf;
-	}
-
-	/**
-	 * Hyperplane partitioning. Subdivide the list of points by a plane
-	 * perpendicular to the axis corresponding to 'cutDimension' at value 'cutValue'.
-	 * On return:
-	 * data[objectsIndices.get(start..start+lim1-1)][cutDimension] < cutValue
-	 * data[objectsIndices.get(start+lim1..start+lim2-1)][cutDimension] == cutValue
-	 * data[objectsIndices.get(start+lim2..start + count - 1)][cutDimension] > cutValue
-	 */
-	private void planeSplit (int start, int count, int cutDimension, double cutValue, int[] lim1Andlim2Wrapper) {
-		int lim1, lim2;
-		int left = start;
-		int right = start + count - 1;
-		for (;;) {
-			while (left <= right && data[objectsIndices.get(left)][cutDimension] < cutValue)
-				left++;
-			while (left <= right && data[objectsIndices.get(right)][cutDimension] >= cutValue)
-				right--; 
-			if (left > right)
-				break;
-			Collections.swap(objectsIndices, left, right);
-			left++;
-			right--;
-		}
-		
-		lim1 = left;
-		right = start + count - 1;
-		for (;;) {
-			while (left <= right && data[objectsIndices.get(left)][cutDimension] <= cutValue)
-				left++;
-			while (left <= right && data[objectsIndices.get(right)][cutDimension] > cutValue)
-				right--;
-			if (left > right)
-				break;
-			Collections.swap(objectsIndices, left, right);
-			left++;
-			right--;
-		}
-		lim2 = left;
-		
-		// Convert 'lim1' and 'lim2' from absolute index values in 'objectsIndices',
-		// to relative to 'start'.
-		lim1 -= start;
-		lim2 -= start;
-		
-		lim1Andlim2Wrapper[0] = lim1;
-		lim1Andlim2Wrapper[1] = lim2;
 	}
 }

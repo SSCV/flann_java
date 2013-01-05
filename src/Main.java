@@ -40,8 +40,9 @@ public class Main {
 		IndexKDTreeSingle index = new IndexKDTreeSingle (metric, data, buildParams);
 		index.buildIndex();
 
-		// Perform kNN search.
 		IndexKDTreeSingle.SearchParams searchParams = new IndexKDTreeSingle.SearchParams ();
+		
+		// Perform kNN search.
 		searchParams.eps = 0.0f;
 		searchParams.maxNeighbors = k;
 		//index.knnSearch (queries, indices, distances, searchParams);
