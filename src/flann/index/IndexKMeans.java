@@ -19,12 +19,7 @@ public class IndexKMeans extends IndexBase {
 	// Algorithm used for picking the initial cluster centers.
 	CentersChooserAlgorithm centersInit;
 
-	// Cluster border index. This is used in the tree search phase
-	// when determining the closest cluster to explore next. A zero
-	// value takes into account only the cluster centers, a value greater
-	// than zero also takes into account the size of the cluster.
 	float cbIndex;
-
 	Node root;
 
 	public enum CentersChooserAlgorithm {
@@ -57,15 +52,6 @@ public class IndexKMeans extends IndexBase {
 	}
 
 	private class Node {
-		public Node() {
-		}
-
-		public Node(double[] pivot, double radius, double variance) {
-			this.pivot = pivot;
-			this.radius = radius;
-			this.variance = variance;
-		}
-
 		// The cluster center.
 		public double[] pivot;
 		// The cluster radius.
@@ -78,6 +64,11 @@ public class IndexKMeans extends IndexBase {
 		public ArrayList<Node> children;
 		// Node points (only for terminal nodes).
 		public ArrayList<PointInfo> points;
+
+		public Node() {
+			this.children = new ArrayList<Node>();
+			this.points = new ArrayList<PointInfo>();
+		}
 	}
 
 	private class PointInfo {
@@ -105,6 +96,12 @@ public class IndexKMeans extends IndexBase {
 			throw new ExceptionFLANN("Branching factor must be at least 2");
 		}
 
+		// Prepare objectsIndices.
+		objectsIndices = new ArrayList<Integer>();
+		for (int i = 0; i < numberOfObjects; i++) {
+			objectsIndices.add(i);
+		}
+
 		root = new Node();
 		computeNodeStatistics(root, objectsIndices);
 		computeClustering(root, 0, numberOfObjects, branching);
@@ -113,8 +110,6 @@ public class IndexKMeans extends IndexBase {
 	/**
 	 * Clustering function that takes a cut in the hierarchical k-means tree and
 	 * returns the clusters centers of that clustering.
-	 * 
-	 * @throws ExceptionFLANN
 	 */
 	public int getClusterCenters(double[][] centers) throws ExceptionFLANN {
 		int numClusters = centers.length;
@@ -142,7 +137,7 @@ public class IndexKMeans extends IndexBase {
 			findExactNN(root, resultSet, query);
 		} else {
 			// Priority queue storing intermediate branches in the
-			// best-bin-first search
+			// best-bin-first search.
 			PriorityQueue<Branch<Node>> heap = new PriorityQueue<Branch<Node>>(
 					numberOfObjects);
 
@@ -250,7 +245,7 @@ public class IndexKMeans extends IndexBase {
 	// Function the performs exact nearest neighbor search by traversing the
 	// entire tree.
 	private void findExactNN(Node node, ResultSet resultSet, double[] query) {
-		// Ignore those clusters that are too far away
+		// Ignore those clusters that are too far away.
 		{
 			double bsq = metric.distance(query, node.pivot);
 			double rsq = node.radius;
@@ -320,7 +315,7 @@ public class IndexKMeans extends IndexBase {
 			double val = bsq - rsq - wsq;
 			double val2 = val * val - 4 * rsq * wsq;
 
-			if ((val > 0) && (val2 > 0)) {
+			if (val > 0 && val2 > 0) {
 				return;
 			}
 		}
@@ -387,6 +382,7 @@ public class IndexKMeans extends IndexBase {
 
 		if (count < branching) {
 			for (int i = 0; i < count; i++) {
+				node.points.add(new PointInfo());
 				node.points.get(i).index = objectsIndices.get(start + i);
 				node.points.get(i).point = data[objectsIndices.get(start + i)];
 			}
@@ -414,8 +410,10 @@ public class IndexKMeans extends IndexBase {
 		int centersLength = centersIdx.size();
 		if (centersLength < branching) {
 			for (int i = 0; i < count; i++) {
-				node.points.get(i).index = objectsIndices.get(start + i);
-				node.points.get(i).point = data[objectsIndices.get(start + i)];
+				node.points.get(start + i).index = objectsIndices
+						.get(start + i);
+				node.points.get(start + i).point = data[objectsIndices
+						.get(start + i)];
 			}
 			node.children.clear();
 			return;
@@ -435,8 +433,8 @@ public class IndexKMeans extends IndexBase {
 			radiuses[i] = 0;
 			count2[i] = 0;
 		}
-
 		int[] belongsTo = new int[count];
+
 		for (int i = 0; i < count; i++) {
 			double sqDist = metric.distance(
 					data[objectsIndices.get(start + i)], dcenters[0]);
@@ -445,14 +443,14 @@ public class IndexKMeans extends IndexBase {
 				double newSqDist = metric.distance(
 						data[objectsIndices.get(start + i)], dcenters[j]);
 				if (sqDist > newSqDist) {
-					belongsTo[i] = j;
+					belongsTo[start + i] = j;
 					sqDist = newSqDist;
 				}
 			}
-			if (sqDist > radiuses[belongsTo[i]]) {
-				radiuses[belongsTo[i]] = sqDist;
+			if (sqDist > radiuses[belongsTo[start + i]]) {
+				radiuses[belongsTo[start + i]] = sqDist;
 			}
-			count2[belongsTo[i]] = count2[i];
+			count2[belongsTo[start + i]] = count2[start + i];
 		}
 
 		boolean converged = false;
@@ -471,7 +469,7 @@ public class IndexKMeans extends IndexBase {
 
 			for (int i = 0; i < count; i++) {
 				double[] vec = data[objectsIndices.get(start + i)];
-				double[] center = dcenters[belongsTo[i]];
+				double[] center = dcenters[belongsTo[start + i]];
 				for (int k = 0; k < numberOfDimensions; k++) {
 					center[k] += vec[k];
 				}
@@ -502,10 +500,10 @@ public class IndexKMeans extends IndexBase {
 					radiuses[newCentroid] = sqDist;
 				}
 
-				if (newCentroid != belongsTo[i]) {
-					count2[belongsTo[i]]--;
+				if (newCentroid != belongsTo[start + i]) {
+					count2[belongsTo[start + i]]--;
 					count2[newCentroid]++;
-					belongsTo[i] = newCentroid;
+					belongsTo[start + i] = newCentroid;
 					converged = false;
 				}
 			}
@@ -520,8 +518,8 @@ public class IndexKMeans extends IndexBase {
 					}
 
 					for (int k = 0; k < count; k++) {
-						if (belongsTo[k] == j) {
-							belongsTo[k] = i;
+						if (belongsTo[start + k] == j) {
+							belongsTo[start + k] = i;
 							count2[j]--;
 							count2[i]++;
 							break;
@@ -532,6 +530,7 @@ public class IndexKMeans extends IndexBase {
 				}
 			}
 		}
+
 		double[][] centers = new double[branching][numberOfDimensions];
 		for (int i = 0; i < branching; i++) {
 			for (int j = 0; j < numberOfDimensions; j++) {
@@ -547,7 +546,7 @@ public class IndexKMeans extends IndexBase {
 
 			double variance = 0;
 			for (int i = 0; i < count; i++) {
-				if (belongsTo[i] == c) {
+				if (belongsTo[start + i] == c) {
 					variance += metric.distance(centers[c],
 							data[objectsIndices.get(start + i)]);
 					Collections.swap(objectsIndices, i, end);
@@ -557,7 +556,11 @@ public class IndexKMeans extends IndexBase {
 			}
 			variance /= s;
 
-			node.children.add(new Node(centers[c], radiuses[c], variance));
+			Node newNode = new Node();
+			newNode.radius = radiuses[c];
+			newNode.pivot = centers[c];
+			newNode.variance = variance;
+			node.children.add(newNode);
 			computeClustering(node.children.get(c), start + start2, end
 					- start2, branching);
 			start2 = end;
