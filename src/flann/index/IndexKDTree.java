@@ -39,26 +39,7 @@ public class IndexKDTree extends IndexBase {
 		public int cutDimension;
 		public double cutDimensionValue;
 	}
-
-	private class Branch implements Comparable<Branch> {
-		Node node;
-		double mindist;
-
-		Branch (Node node, double mindist) {
-			this.node = node;
-			this.mindist = mindist;
-		}
-
-		public int compareTo (Branch other) {
-			if (mindist < other.mindist)
-				return -1;
-			else if (mindist > other.mindist)
-				return 1;
-			else 
-				return 0;
-		}
-	}
-
+	
 	public IndexKDTree (Metric metric, double[][] data, BuildParams buildParams) {
 		super(metric, data);
 
@@ -232,11 +213,11 @@ public class IndexKDTree extends IndexBase {
 	 * because the tree traversal is stopped after a given number of descends in the tree.
 	 */
 	private void getNeighbors (ResultSet resultSet, double[] query, int maxChecks, float epsError) {
-		Branch branch;
+		Branch<Node> branch;
 		int[] checkCount = new int[1];
 		checkCount[0] = 0;
 
-		PriorityQueue<Branch> heap = new PriorityQueue<Branch> (numberOfObjects);
+		PriorityQueue<Branch<Node>> heap = new PriorityQueue<Branch<Node>> (numberOfObjects);
 		BitSet checked = new BitSet (numberOfObjects);
 
 		// Search once through each tree.
@@ -283,7 +264,7 @@ public class IndexKDTree extends IndexBase {
      */
 	private void searchLevel (ResultSet resultSet, double[] query, Node node, double mindist,
 							  int[] checkCount, int maxChecks, float epsError,
-							  PriorityQueue<Branch> heap, BitSet checked) {
+							  PriorityQueue<Branch<Node>> heap, BitSet checked) {
 		// Ignore branch.
 		if (resultSet.worstDistance() < mindist) {
 			return;
@@ -312,7 +293,7 @@ public class IndexKDTree extends IndexBase {
 
 		double newDistSq = mindist + metric.distance (val, node.cutDimensionValue);
 		if (newDistSq * epsError < resultSet.worstDistance() || !resultSet.full()) {
-			heap.add (new Branch(otherChild, newDistSq));
+			heap.add (new Branch<Node>(otherChild, newDistSq));
 		}
 
 		// Call recursively to search next level down.
