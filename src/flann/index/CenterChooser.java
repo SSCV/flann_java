@@ -22,7 +22,7 @@ public class CenterChooser {
 				if (rnd < 0)
 					return;
 
-				centers.set(index, objectsIndices.get(start + rnd));
+				centers.add(objectsIndices.get(start + rnd));
 
 				for (int j = 0; j < index; j++) {
 					double sq = metric.distance(data[centers.get(index)],
@@ -39,20 +39,19 @@ public class CenterChooser {
 			ArrayList<Integer> objectsIndices, int start, int count,
 			ArrayList<Integer> centers) {
 		// Pick the first center randomly.
-		int n = count;
-		int rnd = Utils.genRandomNumberInRange(0, n - 1);
-		centers.set(0, objectsIndices.get(start + rnd));
+		int rnd = Utils.genRandomNumberInRange(0, count - 1);
+		centers.add(objectsIndices.get(start + rnd));
 
 		int index;
 		for (index = 1; index < k; index++) {
 			int bestIndex = -1;
 			double bestValue = 0;
-			for (int j = 0; j < n; j++) {
+			for (int j = 0; j < count; j++) {
 				double dist = metric.distance(data[centers.get(0)],
-						data[objectsIndices.get(j)]);
+						data[objectsIndices.get(start + j)]);
 				for (int i = 1; i < index; i++) {
 					double tmpDist = metric.distance(data[centers.get(i)],
-							data[objectsIndices.get(j)]);
+							data[objectsIndices.get(start + j)]);
 					if (tmpDist < dist) {
 						dist = tmpDist;
 					}
@@ -63,7 +62,7 @@ public class CenterChooser {
 				}
 			}
 			if (bestIndex != -1) {
-				centers.set(index, objectsIndices.get(bestIndex));
+				centers.add(objectsIndices.get(start + bestIndex));
 			} else {
 				break;
 			}
@@ -79,11 +78,12 @@ public class CenterChooser {
 
 		// Chose one random center and set the closestDistSq values.
 		int index = Utils.genRandomNumberInRange(0, n - 1);
-		centers.set(0, objectsIndices.get(start + index));
+		centers.add(objectsIndices.get(start + index));
 
 		for (int i = 0; i < n; i++) {
-			closestDistSq[i] = metric.distance(data[objectsIndices.get(i)],
-					data[objectsIndices.get(index)]);
+			closestDistSq[i] = metric.distance(
+					data[objectsIndices.get(start + i)],
+					data[objectsIndices.get(start + index)]);
 			currentPotential += closestDistSq[i];
 		}
 
@@ -108,8 +108,9 @@ public class CenterChooser {
 				// Compute the new potential.
 				double newPotential = 0;
 				for (int i = 0; i < n; i++) {
-					double d = metric.distance(data[objectsIndices.get(i)],
-							data[objectsIndices.get(index)]);
+					double d = metric.distance(
+							data[objectsIndices.get(start + i)],
+							data[objectsIndices.get(start + index)]);
 					newPotential += Math.min(d, closestDistSq[i]);
 				}
 
@@ -120,11 +121,11 @@ public class CenterChooser {
 				}
 			}
 
-			centers.set(centerCount, objectsIndices.get(bestNewIndex));
+			centers.add(objectsIndices.get(start + bestNewIndex));
 			currentPotential = bestNewPotential;
 			for (int i = 0; i < n; i++) {
-				double d = metric.distance(data[objectsIndices.get(i)],
-						data[objectsIndices.get(bestNewIndex)]);
+				double d = metric.distance(data[objectsIndices.get(start + i)],
+						data[objectsIndices.get(start + bestNewIndex)]);
 				closestDistSq[i] = Math.min(d, closestDistSq[i]);
 			}
 		}
