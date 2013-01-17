@@ -2,16 +2,20 @@ import flann.index.IndexBase;
 import flann.index.IndexKDTree;
 import flann.index.IndexKDTreeSingle;
 import flann.index.IndexKMeans;
+import flann.index.IndexLSH;
 import flann.metric.Metric;
 import flann.metric.MetricEuclideanSquared;
+import flann.metric.MetricHamming;
 
 public class Main {
 	public static void main(String[] args) {
 		// Each row is a 2D point.
 		double[][] data = { { 1, 1 }, { 3, 3 }, { 3, 4 }, { 7, 7 }, { 7, 6 } };
+		int[][] dataBinary = { { 1 }, { 3 }, { 4 }, { 7 }, { 8 } };
 
 		// Each row is a query.
 		double[][] queries = { { 3, 1 }, { 5, 3 }, { 3, 3.6 } };
+		int[][] queriesBinary = { { 2 }, { 5 }, { 6 } };
 
 		// kNN search parameter.
 		int k = 3;
@@ -62,7 +66,17 @@ public class Main {
 		IndexKMeans.SearchParams searchParams3 = new IndexKMeans.SearchParams();
 		searchParams3.maxNeighbors = k;
 		searchParams3.eps = 0.0f;
-		index3.knnSearch(queries, indices, distances, searchParams3);
+		// index3.knnSearch(queries, indices, distances, searchParams3);
+
+		// Construct and search with LSH index.
+		Metric metric2 = new MetricHamming();
+		IndexLSH.BuildParams buildParams3 = new IndexLSH.BuildParams();
+		IndexBase index4 = new IndexLSH(metric2, dataBinary, buildParams3);
+		index4.buildIndex();
+		IndexLSH.SearchParams searchParams4 = new IndexLSH.SearchParams();
+		searchParams4.maxNeighbors = k;
+		searchParams4.eps = 0.0f;
+		index4.knnSearch(queriesBinary, indices, distances, searchParams4);
 
 		// Print the result contained in matrices 'indices' and 'distances'.
 		for (int i = 0; i < q; i++) {

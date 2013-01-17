@@ -4,18 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class LSHTable {
-	private class Bucket {
-		ArrayList<Integer> points = new ArrayList<Integer>();
-
-		public void add(int pointIndex) {
-			points.add(pointIndex);
-		}
-	}
-
 	private class Buckets {
 		// ArrayList of buckets. Each bucket is an ArrayList of
 		// Integer values, that represent points indices.
-		ArrayList<Bucket> buckets = new ArrayList<Bucket>();
+		public ArrayList<Bucket> buckets = new ArrayList<Bucket>();
 
 		// A bucket is accessed with a key, and then the pointIndex
 		// is added in the bucket corresponding to that key.
@@ -24,11 +16,15 @@ public class LSHTable {
 		}
 
 		public Bucket getBucket(int key) {
-			return buckets.get(key);
+			if (key >= 0 && key < buckets.size()) {
+				return buckets.get(key);
+			} else {
+				return null;
+			}
 		}
 	}
 
-	Buckets buckets = new Buckets();
+	Buckets buckets;
 
 	// Size of the key in bits.
 	int keySize;
@@ -49,7 +45,7 @@ public class LSHTable {
 		}
 	}
 
-	private Bucket getBucket(int key) {
+	public Bucket getBucket(int key) {
 		return buckets.getBucket(key);
 	}
 
@@ -85,6 +81,12 @@ public class LSHTable {
 	// represented as 'int[] point'.
 	public LSHTable(int pointSize, int keySize) {
 		this.keySize = keySize;
+
+		buckets = new Buckets();
+		int size = 1 << keySize;
+		for (int i = 0; i < size; i++) {
+			buckets.buckets.add(new Bucket());
+		}
 
 		mask = new ArrayList<Integer>();
 		for (int i = 0; i < pointSize; i++) {

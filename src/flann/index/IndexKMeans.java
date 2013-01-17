@@ -512,4 +512,9 @@ public class IndexKMeans extends IndexBase {
 		return bestIndex;
 	}
 
+	@Override
+	protected void findNeighbors(ResultSet resultSet, int[] query,
+			SearchParamsBase searchParams) {
+	}
+
 }
