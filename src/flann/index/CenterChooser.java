@@ -7,6 +7,10 @@ import flann.util.UniqueRandom;
 import flann.util.Utils;
 
 public class CenterChooser {
+	public enum Algorithm {
+		FLANN_CENTERS_RANDOM, FLANN_CENTERS_GONZALES, FLANN_CENTERS_KMEANSPP
+	}
+
 	public static void Random(Metric metric, double[][] data, int k,
 			ArrayList<Integer> objectsIndices, int start, int count,
 			ArrayList<Integer> centers) {

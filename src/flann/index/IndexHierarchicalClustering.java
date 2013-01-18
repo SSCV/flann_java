@@ -33,17 +33,17 @@ public class IndexHierarchicalClustering extends IndexBase {
 		public int branching;
 		public int trees;
 		public int leafMaxSize;
-		public CentersChooserAlgorithm centersInit;
+		public CenterChooser.Algorithm centersInit;
 
 		public BuildParams() {
 			this.branching = 32;
 			this.trees = 4;
 			this.leafMaxSize = 100;
-			this.centersInit = CentersChooserAlgorithm.FLANN_CENTERS_RANDOM;
+			this.centersInit = CenterChooser.Algorithm.FLANN_CENTERS_RANDOM;
 		}
 
 		public BuildParams(int branching, int trees, int leafMaxSize,
-				CentersChooserAlgorithm centersInit) {
+				CenterChooser.Algorithm centersInit) {
 			this.branching = branching;
 			this.trees = trees;
 			this.leafMaxSize = leafMaxSize;
@@ -54,15 +54,11 @@ public class IndexHierarchicalClustering extends IndexBase {
 	public static class SearchParams extends SearchParamsBase {
 	}
 
-	public enum CentersChooserAlgorithm {
-		FLANN_CENTERS_RANDOM, FLANN_CENTERS_GONZALES, FLANN_CENTERS_KMEANSPP
-	}
-
 	ArrayList<Node> treeRoots;
 	int branching;
 	int trees;
 	int leafMaxSize;
-	CentersChooserAlgorithm centersInit;
+	CenterChooser.Algorithm centersInit;
 
 	public IndexHierarchicalClustering(Metric metric, int[][] data,
 			BuildParams buildParams) {

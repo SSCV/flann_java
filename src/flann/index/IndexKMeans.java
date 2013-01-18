@@ -23,28 +23,24 @@ public class IndexKMeans extends IndexBase {
 	 */
 	float cbIndex;
 
-	CentersChooserAlgorithm centersInit;
+	CenterChooser.Algorithm centersInit;
 	Node root;
-
-	public enum CentersChooserAlgorithm {
-		FLANN_CENTERS_RANDOM, FLANN_CENTERS_GONZALES, FLANN_CENTERS_KMEANSPP
-	}
 
 	public static class BuildParams {
 		public int branching;
 		public int iterations;
 		public float cbIndex;
-		public CentersChooserAlgorithm centersInit;
+		public CenterChooser.Algorithm centersInit;
 
 		public BuildParams() {
 			this.branching = 32;
 			this.iterations = 11;
 			this.cbIndex = 0.2f;
-			this.centersInit = CentersChooserAlgorithm.FLANN_CENTERS_RANDOM;
+			this.centersInit = CenterChooser.Algorithm.FLANN_CENTERS_RANDOM;
 		}
 
 		public BuildParams(int branching, int iterations, float cbIndex,
-				CentersChooserAlgorithm centersInit) {
+				CenterChooser.Algorithm centersInit) {
 			this.branching = branching;
 			this.iterations = iterations;
 			this.cbIndex = cbIndex;
