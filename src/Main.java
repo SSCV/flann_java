@@ -1,4 +1,5 @@
 import flann.index.IndexBase;
+import flann.index.IndexHierarchicalClustering;
 import flann.index.IndexKDTree;
 import flann.index.IndexKDTreeSingle;
 import flann.index.IndexKMeans;
@@ -76,7 +77,17 @@ public class Main {
 		IndexLSH.SearchParams searchParams4 = new IndexLSH.SearchParams();
 		searchParams4.maxNeighbors = k;
 		searchParams4.eps = 0.0f;
-		index4.knnSearch(queriesBinary, indices, distances, searchParams4);
+		// index4.knnSearch(queriesBinary, indices, distances, searchParams4);
+
+		// Construct and search with LSH index.
+		IndexHierarchicalClustering.BuildParams buildParams4 = new IndexHierarchicalClustering.BuildParams();
+		IndexBase index5 = new IndexHierarchicalClustering(metric2, dataBinary,
+				buildParams4);
+		index5.buildIndex();
+		IndexHierarchicalClustering.SearchParams searchParams5 = new IndexHierarchicalClustering.SearchParams();
+		searchParams5.maxNeighbors = k;
+		searchParams5.eps = 0.0f;
+		index5.knnSearch(queriesBinary, indices, distances, searchParams5);
 
 		// Print the result contained in matrices 'indices' and 'distances'.
 		for (int i = 0; i < q; i++) {
