@@ -23,10 +23,14 @@ public class IndexKMeans extends IndexBase {
 	 */
 	float cbIndex;
 
+	public void setCbIndex(float cbIndex) {
+		this.cbIndex = cbIndex;
+	}
+
 	CenterChooser.Algorithm centersInit;
 	Node root;
 
-	public static class BuildParams {
+	public static class BuildParams extends BuildParamsBase {
 		public int branching;
 		public int iterations;
 		public float cbIndex;
@@ -83,6 +87,8 @@ public class IndexKMeans extends IndexBase {
 		if (iterations < 0) {
 			iterations = Integer.MAX_VALUE;
 		}
+
+		this.type = IndexBase.IndexFLANN.KMEANS;
 	}
 
 	@Override
@@ -511,6 +517,12 @@ public class IndexKMeans extends IndexBase {
 	@Override
 	protected void findNeighbors(ResultSet resultSet, int[] query,
 			SearchParamsBase searchParams) {
+	}
+
+	@Override
+	public int usedMemory() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

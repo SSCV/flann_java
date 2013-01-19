@@ -16,7 +16,7 @@ public class IndexLSH extends IndexBase {
 	// The XOR masks to apply to a key to get the neighboring buckets.
 	ArrayList<Integer> xorMasks;
 
-	public static class BuildParams {
+	public static class BuildParams extends BuildParamsBase {
 		public int tablesNumber;
 		public int keySize;
 		public int multiProbeLevel;
@@ -46,6 +46,8 @@ public class IndexLSH extends IndexBase {
 
 		xorMasks = new ArrayList<Integer>();
 		fillXorMask(0, keySize, multiProbeLevel, xorMasks);
+
+		this.type = IndexBase.IndexFLANN.LSH;
 	}
 
 	private void fillXorMask(int key, int lowestIndex, int level,
@@ -96,6 +98,12 @@ public class IndexLSH extends IndexBase {
 				}
 			}
 		}
+	}
+
+	@Override
+	public int usedMemory() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

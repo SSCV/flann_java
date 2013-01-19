@@ -11,7 +11,7 @@ public class IndexKDTreeSingle extends IndexBase {
 	Node root;
 	BoundingBox rootBBox;
 
-	public static class BuildParams {
+	public static class BuildParams extends BuildParamsBase {
 		public int maxPointsInOneLeafNode;
 		public boolean reorder;
 
@@ -50,6 +50,8 @@ public class IndexKDTreeSingle extends IndexBase {
 		for (int i = 0; i < numberOfObjects; i++) {
 			objectsIndices.add(i);
 		}
+
+		this.type = IndexBase.IndexFLANN.KDTREE_SINGLE;
 	}
 
 	@Override
@@ -211,5 +213,11 @@ public class IndexKDTreeSingle extends IndexBase {
 	@Override
 	protected void findNeighbors(ResultSet resultSet, int[] query,
 			SearchParamsBase searchParams) {
+	}
+
+	@Override
+	public int usedMemory() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

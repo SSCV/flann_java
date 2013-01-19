@@ -29,7 +29,7 @@ public class IndexHierarchicalClustering extends IndexBase {
 		public int[] point;
 	}
 
-	public static class BuildParams {
+	public static class BuildParams extends BuildParamsBase {
 		public int branching;
 		public int trees;
 		public int leafMaxSize;
@@ -68,6 +68,8 @@ public class IndexHierarchicalClustering extends IndexBase {
 		this.centersInit = buildParams.centersInit;
 		this.trees = buildParams.trees;
 		this.leafMaxSize = buildParams.leafMaxSize;
+
+		this.type = IndexBase.IndexFLANN.HIERARCHICAL;
 	}
 
 	@Override
@@ -258,6 +260,11 @@ public class IndexHierarchicalClustering extends IndexBase {
 	protected void findNeighbors(ResultSet resultSet, double[] query,
 			SearchParamsBase searchParams) {
 		throw new ExceptionFLANN("Unsupported types");
+	}
 
+	@Override
+	public int usedMemory() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

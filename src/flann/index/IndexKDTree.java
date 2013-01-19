@@ -16,7 +16,7 @@ public class IndexKDTree extends IndexBase {
 	int SAMPLE_MEAN = 100;
 	int RAND_DIM = 5;
 
-	public static class BuildParams {
+	public static class BuildParams extends BuildParamsBase {
 		public int trees;
 
 		public BuildParams() {
@@ -48,6 +48,8 @@ public class IndexKDTree extends IndexBase {
 		for (int i = 0; i < numberOfObjects; i++) {
 			objectsIndices.add(i);
 		}
+
+		this.type = IndexBase.IndexFLANN.KDTREE;
 	}
 
 	@Override
@@ -321,5 +323,11 @@ public class IndexKDTree extends IndexBase {
 	@Override
 	protected void findNeighbors(ResultSet resultSet, int[] query,
 			SearchParamsBase searchParams) {
+	}
+
+	@Override
+	public int usedMemory() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

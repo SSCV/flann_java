@@ -14,6 +14,16 @@ import flann.result_set.ResultSet;
  * Base class for all index structures.
  */
 public abstract class IndexBase {
+	public enum IndexFLANN {
+		LINEAR, KDTREE_SINGLE, KDTREE, KMEANS, LSH, HIERARCHICAL, AUTOTUNED, SAVED, COMPOSITE
+	}
+
+	protected IndexFLANN type;
+
+	public IndexBase.IndexFLANN getType() {
+		return this.type;
+	}
+
 	protected Metric metric;
 	protected double[][] data;
 	protected int[][] dataBinary; // binary feature vectors
@@ -278,4 +288,6 @@ public abstract class IndexBase {
 
 	protected abstract void findNeighbors(ResultSet resultSet, int[] query,
 			SearchParamsBase searchParams);
+
+	public abstract int usedMemory();
 }
