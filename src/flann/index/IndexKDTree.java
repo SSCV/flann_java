@@ -38,10 +38,11 @@ public class IndexKDTree extends IndexBase {
 		public double cutDimensionValue;
 	}
 
-	public IndexKDTree(Metric metric, double[][] data, BuildParams buildParams) {
+	public IndexKDTree(Metric metric, double[][] data,
+			BuildParamsBase buildParams) {
 		super(metric, data);
 
-		this.trees = buildParams.trees;
+		this.trees = ((BuildParams) buildParams).trees;
 		treeRootNodes = new ArrayList<Node>();
 
 		objectsIndices = new ArrayList<Integer>();

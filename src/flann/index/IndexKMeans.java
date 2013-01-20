@@ -75,15 +75,17 @@ public class IndexKMeans extends IndexBase {
 		double[] point;
 	}
 
-	public IndexKMeans(Metric metric, double[][] data, BuildParams buildParams) {
+	public IndexKMeans(Metric metric, double[][] data,
+			BuildParamsBase buildParams) {
 		super(metric, data);
 		root = null;
 
 		// Get parameters.
-		branching = buildParams.branching;
-		iterations = buildParams.iterations;
-		centersInit = buildParams.centersInit;
-		cbIndex = buildParams.cbIndex;
+		BuildParams bp = (BuildParams) buildParams;
+		branching = bp.branching;
+		iterations = bp.iterations;
+		centersInit = bp.centersInit;
+		cbIndex = bp.cbIndex;
 		if (iterations < 0) {
 			iterations = Integer.MAX_VALUE;
 		}
