@@ -210,7 +210,7 @@ public class IndexKMeans extends IndexBase {
 			radiuses[i] = 0;
 			count2[i] = 0;
 		}
-		int[] belongsTo = new int[count];
+		Integer[] belongsTo = new Integer[count];
 
 		// Assign points to clusters.
 		for (int i = 0; i < count; i++) {

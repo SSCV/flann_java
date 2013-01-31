@@ -249,7 +249,7 @@ public class IndexAutotuned extends IndexBase {
 		while (timer.getTime() / 1000.0f < 0.2f) {
 			repeats++;
 			timer.start();
-			computeGroundTruth(sampledData, testData, gtMatches, 0, metric);
+			// computeGroundTruth(sampledData, testData, gtMatches, 0, metric);
 			timer.stop();
 		}
 
@@ -312,7 +312,7 @@ public class IndexAutotuned extends IndexBase {
 			while (timer.getTime() / 1000.0f < 0.2) {
 				repeats++;
 				timer.start();
-				computeGroundTruth(data, testDataset, gtMatches, 1, metric);
+				// computeGroundTruth(data, testDataset, gtMatches, 1, metric);
 				timer.stop();
 			}
 			float linear = timer.getTime() / 1000.0f / repeats;
@@ -361,7 +361,8 @@ public class IndexAutotuned extends IndexBase {
 
 		IndexBase.IndexFLANN indexType = (IndexBase.IndexFLANN) bestBuildParams
 				.get("algorithm");
-		bestIndex = createIndexByType(indexType, data, bestBuildParams, metric);
+		// bestIndex = createIndexByType(indexType, data, bestBuildParams,
+		// metric);
 		bestIndex.buildIndex();
 
 		speedup = estimateSearchParams(bestSearchParams);

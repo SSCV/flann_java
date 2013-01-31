@@ -141,7 +141,7 @@ public class IndexHierarchicalClustering extends IndexBase {
 			return;
 		}
 		double cost[] = new double[1];
-		int[] labels = new int[count];
+		Integer[] labels = new Integer[count];
 		computeLabels(start, count, centers, labels, cost);
 
 		int start2 = 0;
@@ -166,7 +166,7 @@ public class IndexHierarchicalClustering extends IndexBase {
 	}
 
 	private void computeLabels(int start, int count,
-			ArrayList<Integer> centers, int[] labels, double[] cost) {
+			ArrayList<Integer> centers, Integer[] labels, double[] cost) {
 		cost[0] = 0.0;
 		int centersLength = centers.size();
 		for (int i = 0; i < count; i++) {
